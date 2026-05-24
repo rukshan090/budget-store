@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Store Computers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#0f172a;color:#fff}
+header{background:#111827;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;border-bottom:1px solid #1e293b}
+.logo{font-size:24px;font-weight:700;color:#22c55e}
+.search-box input{padding:10px 15px;border:none;border-radius:10px;width:260px;outline:none}
+.cart-btn{background:#22c55e;color:#fff;padding:10px 18px;border:none;border-radius:10px;cursor:pointer;font-weight:600}
+.hero{padding:60px 20px;text-align:center;background:linear-gradient(to right,#0f172a,#111827)}
+.hero h1{font-size:48px;margin-bottom:10px}
+.hero p{color:#cbd5e1}
+.categories{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:20px}
+.categories button{padding:10px 18px;border:none;border-radius:30px;background:#1e293b;color:#fff;cursor:pointer;font-weight:500}
+.categories button:hover{background:#22c55e}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;padding:30px}
+.card{background:#1e293b;padding:15px;border-radius:18px;transition:.3s;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+.card:hover{transform:translateY(-5px)}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:12px}
+.card h3{margin-top:10px}
+.price{color:#22c55e;font-size:20px;font-weight:700;margin:8px 0}
+.card button{width:100%;padding:10px;border:none;border-radius:10px;background:#22c55e;color:#fff;font-weight:600;cursor:pointer}
+.cart-panel{position:fixed;right:-400px;top:0;width:350px;height:100vh;background:#111827;padding:20px;transition:.4s;overflow-y:auto;z-index:2000}
+.cart-panel.active{right:0}
+.cart-item{background:#1e293b;padding:10px;border-radius:10px;margin:10px 0}
+.total{font-size:20px;margin-top:20px;color:#22c55e}
+.whatsapp{position:fixed;bottom:20px;right:20px;background:#25D366;color:#fff;padding:15px 20px;border-radius:50px;text-decoration:none;font-weight:700}
+footer{text-align:center;padding:20px;background:#020617;color:#94a3b8;margin-top:40px}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">Budget Store Computers</div>
+<div class="search-box">
+<input type="text" id="search" placeholder="Search products..." onkeyup="renderProducts()">
+</div>
+<button class="cart-btn" onclick="toggleCart()">🛒 Cart (<span id="cartCount">0</span>)</button>
+</header>
+
+<section class="hero">
+<h1>Gaming & Computer Parts Store</h1>
+<p>Processors, RAM, SSD, Graphics Cards, Keyboards, Gaming Accessories & More</p>
+</section>
+
+<section class="categories">
+<button onclick="filterCategory('All')">All</button>
+<button onclick="filterCategory('Processor')">Processors</button>
+<button onclick="filterCategory('Motherboard')">Motherboards</button>
+<button onclick="filterCategory('RAM')">RAM</button>
+<button onclick="filterCategory('SSD')">SSD</button>
+<button onclick="filterCategory('Graphics Card')">Graphics Cards</button>
+<button onclick="filterCategory('Keyboard')">Keyboards</button>
+<button onclick="filterCategory('Mouse')">Mouse</button>
+</section>
+
+<section class="products" id="productList"></section>
+
+<div class="cart-panel" id="cartPanel">
+<h2>Shopping Cart</h2>
+<div id="cartItems"></div>
+<div class="total">Total: Rs <span id="totalPrice">0</span></div>
+</div>
+
+<a class="whatsapp" href="https://wa.me/94702520930" target="_blank">WhatsApp Us</a>
+
+<footer>
+© 2026 Budget Store Computers | All Rights Reserved
+</footer>
+
+<script>
+let products = [
+{name:'Intel Core i5 12400F',category:'Processor',price:48000,image:'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?q=80&w=1200&auto=format&fit=crop'},
+{name:'RTX 4060 Graphics Card',category:'Graphics Card',price:145000,image:'https://images.unsplash.com/photo-1591488320449-011701bb6704?q=80&w=1200&auto=format&fit=crop'},
+{name:'16GB DDR4 RAM',category:'RAM',price:18500,image:'https://images.unsplash.com/photo-1562976540-1502c2145186?q=80&w=1200&auto=format&fit=crop'},
+{name:'Gaming Keyboard RGB',category:'Keyboard',price:12500,image:'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1200&auto=format&fit=crop'}
+];
+
+let cart=[];
+let selectedCategory='All';
+
+function renderProducts(){
+const list=document.getElementById('productList');
+const search=document.getElementById('search').value.toLowerCase();
+list.innerHTML='';
+
+products.filter(product=>{
+return (selectedCategory==='All'||product.category===selectedCategory)
+&& product.name.toLowerCase().includes(search);
+}).forEach((product,index)=>{
+list.innerHTML += `
+<div class="card">
+<img src="${product.image}" alt="${product.name}">
+<h3>${product.name}</h3>
+<p>${product.category}</p>
+<div class="price">Rs ${product.price}</div>
+<button onclick="addToCart(${index})">Add To Cart</button>
+</div>`;
+});
+}
+
+function filterCategory(category){
+selectedCategory=category;
+renderProducts();
+}
+
+function addToCart(index){
+cart.push(products[index]);
+renderCart();
+}
+
+function renderCart(){
+const items=document.getElementById('cartItems');
+const total=document.getElementById('totalPrice');
+const count=document.getElementById('cartCount');
+items.innerHTML='';
+
+let totalPrice=0;
+cart.forEach(item=>{
+items.innerHTML += `
+<div class="cart-item">
+<h4>${item.name}</h4>
+<p>Rs ${item.price}</p>
+</div>`;
+totalPrice += item.price;
+});
+
+total.innerText=totalPrice;
+count.innerText=cart.length;
+}
+
+function toggleCart(){
+document.getElementById('cartPanel').classList.toggle('active');
+}
+
+renderProducts();
+</script>
+
+</body>
+</html>
